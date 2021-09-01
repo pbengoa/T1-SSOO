@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include "semaforo.h"
 
 int main(int argc, char const *argv[])
 {
