@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 
 #include "../file_manager/manager.h"
 
@@ -14,17 +15,24 @@ int main(int argc, char const *argv[])
   printf("Leyendo el archivo %s...\n", filename);
   printf("- Lineas en archivo: %i\n", data_in->len);
   printf("- Contenido del archivo:\n");
-
+  int *distances = calloc(4,sizeof(int));
+  int *datos = calloc (5, sizeof(int));
+  
   printf("\t- ");
   for (int i = 0; i < 4; i++)
   {
+    int x = atoi(data_in->lines[0][i]);
+    distances[i] = x;
     printf("%s, ", data_in->lines[0][i]);
+     
   }
   printf("\n");
-
+  //printf("la distancia es de %i\n", distances[1]);
   printf("\t- ");
   for (int i = 0; i < 5; i++)
   {
+    int y = atoi(data_in->lines[1][i]);
+    datos[i] = y;
     printf("%s, ", data_in->lines[1][i]);
   }
   printf("\n");
