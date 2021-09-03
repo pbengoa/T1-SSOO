@@ -62,8 +62,11 @@ int main(int argc, char const *argv[])
       if(semaforo1 == 0)
       {
           // We are the child
-          printf("semaforo1\n");
-          execlp("./semaforo", "main.c", NULL);
+          // Aca se crean los argumentos que se entregaran a continuacion a EXECV
+            char *args[] = {"./semaforo", NULL};
+            printf("semaforo1\n");
+            execv(args[0], args);
+            //Esto se repite igual en todos los casos
       }
       else 
       {
@@ -71,8 +74,9 @@ int main(int argc, char const *argv[])
         if(semaforo2 == 0)
         {
             // We are the child
+            char *args[] = {"./semaforo", NULL};
             printf("semaforo2\n");
-            execlp("semaforo","semaforo", "main.c",NULL);
+            execv(args[0], args);
         }
         else
         {
@@ -80,8 +84,9 @@ int main(int argc, char const *argv[])
           if(semaforo3 == 0)
           {
               // We are the child
-              printf("semaforo3\n");
-              execlp("semaforo","semaforo", "main.c",NULL);
+            char *args[] = {"./semaforo", NULL};
+            printf("semaforo3\n");
+            execv(args[0], args);
           }
         }
       }
