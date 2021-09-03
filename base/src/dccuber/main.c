@@ -2,8 +2,15 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "../file_manager/manager.h"
+
+void handle_sigint(int sig)
+{
+  printf("FUNCIONOOOOOOOOOOOO: %d\n", sig);
+
+}
 
 int main(int argc, char const *argv[])
 {
@@ -63,10 +70,16 @@ int main(int argc, char const *argv[])
       {
           // We are the child
           // Aca se crean los argumentos que se entregaran a continuacion a EXECV
-            char *args[] = {"./semaforo", NULL};
-            printf("semaforo1\n");
-            execv(args[0], args);
-            //Esto se repite igual en todos los casos
+          char * pid_char = malloc(sizeof(int)); 
+          sprintf(pid_char, "%d", fabrica);
+          char * distance = malloc(sizeof(int)); 
+          sprintf(distance, "%d", distances[0]);
+          char * dato = malloc(sizeof(int)); 
+          sprintf(dato, "%d", datos[2]);
+          char *args[] = {"./semaforo", distance, dato, pid_char, NULL};
+          printf("semaforo1\n");
+          execv(args[0], args);
+          //Esto se repite igual en todos los casos
       }
       else 
       {
@@ -74,9 +87,17 @@ int main(int argc, char const *argv[])
         if(semaforo2 == 0)
         {
             // We are the child
-            char *args[] = {"./semaforo", NULL};
-            printf("semaforo2\n");
-            execv(args[0], args);
+          char * pid_char = malloc(sizeof(int)); 
+          sprintf(pid_char, "%d", fabrica);
+
+          char * distance = malloc(sizeof(int)); 
+          sprintf(distance, "%d", distances[1]);
+
+          char * dato = malloc(sizeof(int)); 
+          sprintf(dato, "%d", datos[3]);
+          char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
+          printf("semaforo2\n");
+          execv(args[0], args);
         }
         else
         {
@@ -84,7 +105,15 @@ int main(int argc, char const *argv[])
           if(semaforo3 == 0)
           {
               // We are the child
-            char *args[] = {"./semaforo", NULL};
+            char * pid_char = malloc(sizeof(int)); 
+            sprintf(pid_char, "%d", fabrica);
+
+            char * distance = malloc(sizeof(int)); 
+            sprintf(distance, "%d", distances[2]);
+
+            char * dato = malloc(sizeof(int)); 
+            sprintf(dato, "%d",  datos[4]);
+            char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
             printf("semaforo3\n");
             execv(args[0], args);
           }
@@ -92,8 +121,12 @@ int main(int argc, char const *argv[])
       }
       
   }
-  // semaforo1
-
+  while (true)
+  {
+    signal(SIGINT, handle_sigint);
+    sleep(4);
+    return 0;
+  }
 
 
 
