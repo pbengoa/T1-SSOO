@@ -3,12 +3,14 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "../file_manager/manager.h"
 
 void handle_sigint(int sig)
 {
   printf("FUNCIONOOOOOOOOOOOO: %d\n", sig);
+  //printf("el id del semaforo es %d", sen);
 
 }
 
@@ -34,7 +36,6 @@ int main(int argc, char const *argv[])
      
   }
   printf("\n");
-  //printf("la distancia es de %i\n", distances[1]);
   printf("\t- ");
   for (int i = 0; i < 5; i++)
   {
@@ -123,7 +124,7 @@ int main(int argc, char const *argv[])
   }
   while (true)
   {
-    signal(SIGINT, handle_sigint);
+    signal(SIGUSR1, handle_sigint);
     sleep(4);
     return 0;
   }

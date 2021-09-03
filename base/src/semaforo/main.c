@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include "semaforo.h"
 #include <stdlib.h>
+#include <signal.h>
+#include "../file_manager/manager.h"
 
 Semaforo* semaforo_init(int id, int delay, int parentId)
 {
@@ -23,7 +25,8 @@ int main(int argc, char const *argv[])
   Semaforo* semaforo = semaforo_init(id, delay, parentId);
   printf("semaforo data: %d, %d, %d\n", semaforo->id,semaforo->delay, semaforo->parentId);
   sleep(1);
-  kill(semaforo ->parentId, SIGINT);
+  //sigqueue(semaforo ->parentId, SIGUSR1, semaforo->id);
+  send_signal_with_int(semaforo->parentId, semaforo->id);
   // while ()
   // {
   //   sleep(semaforo ->delay);
