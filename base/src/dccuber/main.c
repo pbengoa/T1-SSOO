@@ -76,19 +76,16 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
     if (id_semaforos[0] == 0)
     {
       id_semaforos[0] = number_received;
-      lights[0] = 1;
       printf("SE INGRESA EL PRIMER SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
     else if(id_semaforos[1] == 0)
     {
       id_semaforos[1] = number_received;
-      lights[1] = 1;
       printf("SE INGRESA EL segundo SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
     else if(id_semaforos[2] == 0)
     {
       id_semaforos[2] = number_received;
-      lights[2] = 1;
       printf("SE INGRESA EL tercer SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
   }
@@ -130,14 +127,17 @@ int main(int argc, char const *argv[])
   printf("\n");
   // crear array
   pid_t fabrica = fork();
-  if(fabrica < 0)
-  {
-      printf("NOT SUCH FILE IN DIR\n");
-  }
-  else if(fabrica == 0)
+  if(fabrica == 0)
   {
       // This code will be executed only by the child
       printf(" IN DIR\n");
+
+      while (true)
+      {
+        // signal(SIGUSR1, handle_sigint);
+        connect_sigaction(SIGUSR1, handle_sigint);
+      }
+      
       // sleep(5);
       // printf(" fbsffsnfsnR\n");
       // for ()
@@ -151,7 +151,6 @@ int main(int argc, char const *argv[])
   else
   {
       pid_t semaforo1 = fork();
-      // id_semaforos[0] = getpid();
       if(semaforo1 == 0)
       {
           // We are the child
@@ -168,6 +167,8 @@ int main(int argc, char const *argv[])
       }
       else 
       {
+        printf(" fbsffsnfsnR\n");
+        send_signal_with_int(fabrica, semaforo1);
         pid_t semaforo2 = fork();
         if(semaforo2 == 0)
         {
@@ -185,6 +186,8 @@ int main(int argc, char const *argv[])
         }
         else
         {
+          send_signal_with_int(fabrica, semaforo2);
+          // id_semaforos[1] = semaforo2;
           pid_t semaforo3 = fork();
           if(semaforo3 == 0)
           {
@@ -199,15 +202,20 @@ int main(int argc, char const *argv[])
             char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
             execv(args[0], args);
           }
+          else
+          {
+            // id_semaforos[2] = semaforo3;
+            send_signal_with_int(fabrica, semaforo3);
+          }
         }
       }
       
   }
-  while (true)
-  {
-    // signal(SIGUSR1, handle_sigint);
-    connect_sigaction(SIGUSR1, handle_sigint);
-  }
+  // while (true)
+  // {
+  //   // signal(SIGUSR1, handle_sigint);
+  //   connect_sigaction(SIGUSR1, handle_sigint);
+  // }
 
   printf("Liberando memoria...\n");
   input_file_destroy(data_in);

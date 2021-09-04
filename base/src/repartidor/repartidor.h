@@ -12,13 +12,25 @@ struct repartidor
     // el repartidor se le da el color actual de los semaforos
 
     // tengo que tener la distancia a cada semaforo, y en que turno pase cada semaforo
-    int semaforo1;
-    int semaforo2;
-    int semaforo3;
+    int id;
+    int color_s1;
+    int color_s2;
+    int color_s3;
+    int pos_s1;
+    int pos_s2;
+    int pos_s3;
     int bodega;
     int position;
-    int id;
 };
 
 typedef struct repartidor Repartidor;
-Repartidor* repartidor_init(int semaforo1, int semaforo2, int semaforo3, int bodega);
+Repartidor* repartidor_init(
+    int id,
+    int color_s1,
+    int color_s2,
+    int color_s3,
+    int pos_s1,
+    int pos_s2,
+    int pos_s3,
+    int bodega
+    );
