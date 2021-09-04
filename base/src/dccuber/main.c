@@ -8,6 +8,47 @@
 // global int *lights = calloc(3,sizeof(int));
 int *lights;
 int *id_semaforos;
+int *distances;
+int *repartidores;
+int creados;
+
+void handle_repartidor(int sig)
+{
+  pid_t repartidor = fork();
+  if (repartidor == 0)
+  {
+    printf("Se crea el repartidor %d\n", repartidor);
+    char *d1 = malloc(sizeof(int));
+    sprintf(d1, "%d", distances[0]);
+
+    char *d2 = malloc(sizeof(int));
+    sprintf(d2, "%d", distances[1]);
+
+    char *d3 = malloc(sizeof(int));
+    sprintf(d3, "%d", distances[2]);
+
+    char *d4 = malloc(sizeof(int));
+    sprintf(d4, "%d", distances[3]);
+
+    char *l1 = malloc(sizeof(int));
+    sprintf(l1, "%d", lights[0]);
+
+     char *l2 = malloc(sizeof(int));
+    sprintf(l2, "%d", lights[1]);
+
+    char *l3 = malloc(sizeof(int));
+    sprintf(l3, "%d", lights[2]);
+    char * args[] ={"./repartidor", l1, l2, l3, 
+    d1, d2, d3, d4};
+    execv(args[0], args);
+  }
+  else
+  {
+    repartidores[creados] = repartidor;
+    creados ++;
+
+  }
+}
 
 void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 {
@@ -25,6 +66,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       lights[0] = 1;
       printf("ESTABA EN VERDE 1\n");
       // ahora hay que mandar la señal a los repartidores
+      // for repatidor: mando señal
     }
     else
     {
@@ -95,14 +137,14 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 int main(int argc, char const *argv[])
 {
   printf("I'm the DCCUBER process and my PID is: %i\n", getpid());
-
+  creados = 0;
   char *filename = "input.txt";
   InputFile *data_in = read_file(filename);
 
   printf("Leyendo el archivo %s...\n", filename);
   printf("- Lineas en archivo: %i\n", data_in->len);
   printf("- Contenido del archivo:\n");
-  int *distances = calloc(4,sizeof(int));
+  distances = calloc(4,sizeof(int));
   int *datos = calloc (5, sizeof(int));
   lights = calloc(3,sizeof(int));
   id_semaforos = calloc(3,sizeof(int));
@@ -125,6 +167,7 @@ int main(int argc, char const *argv[])
     printf("%s, ", data_in->lines[1][i]);
   }
   printf("\n");
+  repartidores = malloc(datos[1] * sizeof(int));
   // crear array
   pid_t fabrica = fork();
   if(fabrica == 0)
@@ -134,12 +177,13 @@ int main(int argc, char const *argv[])
 
       while (true)
       {
-        // signal(SIGUSR1, handle_sigint);
+        // señal del semaforo
         connect_sigaction(SIGUSR1, handle_sigint);
+
+        // alarm repartidor
+        signal(SIGALRM, handle_repartidor);
+        alarm(datos[0]);
       }
-      
-      // sleep(5);
-      // printf(" fbsffsnfsnR\n");
       // for ()
       // pid_t repartidor = fork();
       // if (repartidor == 0) 
