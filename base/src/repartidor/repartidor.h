@@ -12,6 +12,8 @@ struct repartidor
     int semaforo2;
     int semaforo3;
     int bodega;
+    int position;
+    int id;
 };
 
 typedef struct repartidor Repartidor;
