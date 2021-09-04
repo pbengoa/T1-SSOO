@@ -18,7 +18,7 @@ Semaforo* semaforo_init(int id, int distance,int delay, int parentId)
 int main(int argc, char const *argv[])
 {
   printf("I'm the SEMAFORO process and my PID is: %i\n", getpid());
-  // printf("Arg 1: %s, arg 2: %s, arg3: %s\n", argv[1], argv[2], argv[3]);
+  printf("Arg 1: %s, arg 2: %s, arg3: %s\n", argv[1], argv[2], argv[3]);
   int distance = atoi(argv[1]);
   int delay = atoi(argv[2]);
   int parentId = atoi(argv[3]);

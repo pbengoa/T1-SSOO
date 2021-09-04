@@ -3,14 +3,24 @@
 #include "repartidor.h"
 #include <stdlib.h>
 
-Repartidor* repartidor_init(int semaforo1, int semaforo2, int semaforo3, int bodega)
+Repartidor* repartidor_init(
+    int id,
+    int color_s1,
+    int color_s2,
+    int color_s3,
+    int pos_s1,
+    int pos_s2,
+    int pos_s3,
+    int bodega
+  )
 {
   Repartidor* repartidor = malloc(sizeof(Repartidor));
-  repartidor -> semaforo1 = semaforo1;
-  repartidor -> semaforo2 = semaforo2;
-  repartidor -> semaforo3 = semaforo3;
+  repartidor -> pos_s1 = pos_s1;
+  repartidor -> pos_s2 = pos_s2;
+  repartidor -> pos_s3 = pos_s3;
   repartidor -> bodega = bodega;
   repartidor -> position = 0;
+  return repartidor;
 }
 
 int main(int argc, char const *argv[])
