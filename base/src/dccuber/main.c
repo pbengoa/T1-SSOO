@@ -151,6 +151,7 @@ int main(int argc, char const *argv[])
   else
   {
       pid_t semaforo1 = fork();
+      // id_semaforos[0] = getpid();
       if(semaforo1 == 0)
       {
           // We are the child
