@@ -10,14 +10,14 @@ int *lights;
 int *id_semaforos;
 int *distances;
 int *repartidores;
-int creados;
+int creados = 0;
 
 void handle_repartidor(int sig)
 {
   pid_t repartidor = fork();
   if (repartidor == 0)
   {
-    printf("Se crea el repartidor %d\n", repartidor);
+    printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
     char *d1 = malloc(sizeof(int));
     sprintf(d1, "%d", distances[0]);
 
@@ -44,9 +44,10 @@ void handle_repartidor(int sig)
   }
   else
   {
+    printf("--------------------------------------\n");
+    printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
     repartidores[creados] = repartidor;
     creados ++;
-
   }
 }
 
@@ -137,7 +138,6 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 int main(int argc, char const *argv[])
 {
   printf("I'm the DCCUBER process and my PID is: %i\n", getpid());
-  creados = 0;
   char *filename = "input.txt";
   InputFile *data_in = read_file(filename);
 
@@ -173,9 +173,9 @@ int main(int argc, char const *argv[])
   if(fabrica == 0)
   {
       // This code will be executed only by the child
-      printf(" IN DIR\n");
+      printf(" ###############\n");
 
-      while (true)
+      while (creados < datos[1])
       {
         // señal del semaforo
         connect_sigaction(SIGUSR1, handle_sigint);
@@ -184,13 +184,6 @@ int main(int argc, char const *argv[])
         signal(SIGALRM, handle_repartidor);
         alarm(datos[0]);
       }
-      // for ()
-      // pid_t repartidor = fork();
-      // if (repartidor == 0) 
-      // {
-      //   execlp("repartidor","semaforo", "main.c",NULL);
-      // }
-      // sleep(5)
   }
   else
   {
@@ -255,11 +248,6 @@ int main(int argc, char const *argv[])
       }
       
   }
-  // while (true)
-  // {
-  //   // signal(SIGUSR1, handle_sigint);
-  //   connect_sigaction(SIGUSR1, handle_sigint);
-  // }
 
   printf("Liberando memoria...\n");
   input_file_destroy(data_in);
