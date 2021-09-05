@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include "repartidor.h"
 #include <stdlib.h>
-
+#include "../file_manager/manager.h"
 Repartidor* repartidor;
 
 Repartidor* repartidor_init(
@@ -40,33 +40,33 @@ void handler_change_light(int sig, siginfo_t *siginfo, void *context)
   {
     if (repartidor -> color_s1 == 0)
     {
-      repartidor -> color_s1 == 1;
+      repartidor -> color_s1 = 1;
     }
     else
     {
-      repartidor -> color_s1 == 0;
+      repartidor -> color_s1 = 0;
     }
   }
   else if (number_received == 2)
   {
     if (repartidor -> color_s2 == 0)
     {
-      repartidor -> color_s2 == 1;
+      repartidor -> color_s2 = 1;
     }
     else
     {
-      repartidor -> color_s2 == 0;
+      repartidor -> color_s2 = 0;
     }
   }
   else if (number_received == 3)
   {
     if (repartidor -> color_s3 == 0)
     {
-      repartidor -> color_s3 == 1;
+      repartidor -> color_s3 = 1;
     }
     else
     {
-      repartidor -> color_s3 == 0;
+      repartidor -> color_s3 = 0;
     }
   }
 }
@@ -94,12 +94,34 @@ int main(int argc, char const *argv[])
     pos_s3,
     bodega
     );
+
   while (repartidor ->position < repartidor ->bodega)
   {
+    connect_sigaction(SIGUSR1, handler_change_light);
     sleep(1);
+    if (repartidor -> position == repartidor ->pos_s1 && repartidor -> color_s1 == 0)
+    {
+      repartidor -> position ++;
+    }
+    else if (repartidor -> position == repartidor ->pos_s2 && repartidor -> color_s2 == 0)
+    {
+      repartidor -> position ++;
+    }
+    else if (repartidor -> position == repartidor ->pos_s3 && repartidor -> color_s3 == 0)
+    {
+      repartidor -> position ++;
+    }
+    else if (repartidor -> position == repartidor ->bodega)
+    {
+      // escribir archivo
+      // hacer un kill
+    }
+
     // hay que revisar la pos y la luz
-    // atento para recibir señal
     // avanzar
+
+    // atento para recibir señal
+    
   }
   // mandar señal termino
   

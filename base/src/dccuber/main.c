@@ -54,57 +54,57 @@ void handle_repartidor(int sig)
 void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 {
   int number_received = siginfo->si_value.sival_int;
-  printf("THE VALUE %d\n", number_received);
+  //printf("THE VALUE %d\n", number_received);
   // aca se chequea que el id que se recibio sea igual a algun valor de la lista
   // entonces se cambia el color en el caso que coincida
   // y luego hay que notificar a los repartidores
   printf("LOS SEMAFOROS 1: %d, EL SEGUNDO: %d, EL TERCERO: %d\n", id_semaforos[0], id_semaforos[1], id_semaforos[2]);
   if (id_semaforos[0] == number_received){
-    printf("SE INGRESA EL PRIMER SEMORO POR SEGUNDA VEZ: %d\n", number_received);
+    //printf("SE INGRESA EL PRIMER SEMORO POR SEGUNDA VEZ: %d\n", number_received);
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[0] == 0)
     {
       lights[0] = 1;
-      printf("ESTABA EN VERDE 1\n");
+      //printf("ESTABA EN VERDE 1\n");
       // ahora hay que mandar la señal a los repartidores
       // for repatidor: mando señal
     }
     else
     {
       lights[0] = 0;
-      printf("ESTABA EN ROJO 1\n");
+      //printf("ESTABA EN ROJO 1\n");
       // ahora hay que mandar la señal a los repartidores
     }
   }
   else if(id_semaforos[1] == number_received){
-    printf("SE INGRESA EL segundo SEMORO POR SEGUNDA VEZ: %d\n", number_received);
+    //printf("SE INGRESA EL segundo SEMORO POR SEGUNDA VEZ: %d\n", number_received);
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[1] == 0)
     {
       lights[1] = 1;
-      printf("ESTABA EN VERDE 2\n");
+      //printf("ESTABA EN VERDE 2\n");
       // ahora hay que mandar la señal a los repartidores
     }
     else
     {
       lights[1] = 0;
-      printf("ESTABA EN ROJO 2\n");
+      //printf("ESTABA EN ROJO 2\n");
       // ahora hay que mandar la señal a los repartidores
     }
   }
   else if(id_semaforos[2] == number_received){
-    printf("SE INGRESA EL tercer SEMORO POR SEGUNDA VEZ: %d\n", number_received);
+    //printf("SE INGRESA EL tercer SEMORO POR SEGUNDA VEZ: %d\n", number_received);
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[2] == 0)
     {
       lights[2] = 1;
-      printf("ESTABA EN VERDE 3\n");
+      //printf("ESTABA EN VERDE 3\n");
       // ahora hay que mandar la señal a los repartidores
     }
     else
     {
       lights[2] = 0;
-      printf("ESTABA EN ROJO 3\n");
+      //printf("ESTABA EN ROJO 3\n");
       // ahora hay que mandar la señal a los repartidores
     }
   }
@@ -119,17 +119,17 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
     if (id_semaforos[0] == 0)
     {
       id_semaforos[0] = number_received;
-      printf("SE INGRESA EL PRIMER SEMORO POR PRIMERA VEZ: %d\n", number_received);
+      //printf("SE INGRESA EL PRIMER SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
     else if(id_semaforos[1] == 0)
     {
       id_semaforos[1] = number_received;
-      printf("SE INGRESA EL segundo SEMORO POR PRIMERA VEZ: %d\n", number_received);
+      //printf("SE INGRESA EL segundo SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
     else if(id_semaforos[2] == 0)
     {
       id_semaforos[2] = number_received;
-      printf("SE INGRESA EL tercer SEMORO POR PRIMERA VEZ: %d\n", number_received);
+      //printf("SE INGRESA EL tercer SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
   }
 
@@ -167,23 +167,25 @@ int main(int argc, char const *argv[])
     printf("%s, ", data_in->lines[1][i]);
   }
   printf("\n");
-  repartidores = malloc(datos[1] * sizeof(int));
+  //repartidores = malloc(datos[1] * sizeof(int));
   // crear array
+  printf(" ---------674654\n");
   pid_t fabrica = fork();
+  printf(" ---------6746thrttsbdz\n");
   if(fabrica == 0)
   {
-      // This code will be executed only by the child
-      printf(" ###############\n");
+    // This code will be executed only by the child
+    printf(" ###############\n");
 
-      while (creados < datos[1])
-      {
-        // señal del semaforo
-        connect_sigaction(SIGUSR1, handle_sigint);
+    while (creados < datos[1])
+    {
+      // señal del semaforo
+      connect_sigaction(SIGUSR1, handle_sigint);
 
-        // alarm repartidor
-        signal(SIGALRM, handle_repartidor);
-        alarm(datos[0]);
-      }
+      // alarm repartidor
+      signal(SIGALRM, handle_repartidor);
+      alarm(2);
+    }
   }
   else
   {
@@ -192,11 +194,11 @@ int main(int argc, char const *argv[])
       {
           // We are the child
           // Aca se crean los argumentos que se entregaran a continuacion a EXECV
-          char * pid_char = malloc(sizeof(int)); 
+          char * pid_char = calloc(1, sizeof(int)); 
           sprintf(pid_char, "%d", fabrica);
-          char * distance = malloc(sizeof(int)); 
+          char * distance = calloc(1, sizeof(int)); 
           sprintf(distance, "%d", distances[0]);
-          char * dato = malloc(sizeof(int)); 
+          char * dato = calloc(1, sizeof(int)); 
           sprintf(dato, "%d", datos[2]);
           char *args[] = {"./semaforo", distance, dato, pid_char, NULL};
           execv(args[0], args);
@@ -210,13 +212,13 @@ int main(int argc, char const *argv[])
         if(semaforo2 == 0)
         {
             // We are the child
-          char * pid_char = malloc(sizeof(int)); 
+          char * pid_char = calloc(1, sizeof(int)); 
           sprintf(pid_char, "%d", fabrica);
 
-          char * distance = malloc(sizeof(int)); 
+          char * distance = calloc(1, sizeof(int)); 
           sprintf(distance, "%d", distances[1]);
 
-          char * dato = malloc(sizeof(int)); 
+          char * dato = calloc(1, sizeof(int)); 
           sprintf(dato, "%d", datos[3]);
           char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
           execv(args[0], args);
@@ -229,12 +231,12 @@ int main(int argc, char const *argv[])
           if(semaforo3 == 0)
           {
               // We are the child
-            char * pid_char = malloc(sizeof(int)); 
+            char * pid_char = calloc(1, sizeof(int)); 
             sprintf(pid_char, "%d", fabrica);
 
-            char * distance = malloc(sizeof(int)); 
+            char * distance = calloc(1, sizeof(int)); 
             sprintf(distance, "%d", distances[2]);
-            char * dato = malloc(sizeof(int)); 
+            char * dato = calloc(1, sizeof(int)); 
             sprintf(dato, "%d",  datos[4]);
             char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
             execv(args[0], args);
