@@ -44,15 +44,15 @@ void handle_repartidor(int sig)
       char *l3 = malloc(sizeof(int));
       sprintf(l3, "%d", lights[2]);
       char * args[] ={"./repartidor", l1, l2, l3, 
-      d1, d2, d3, d4};
+      d1, d2, d3, d4, NULL};
       execv(args[0], args);
     }
     else
     {
       printf("--------------------------------------\n");
       printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
-      //repartidores[creados] = repartidor;
-      //creados ++;
+      repartidores[creados] = repartidor;
+      creados ++;
       printf("yuytutyutyutyututy\n");
       alarm(datos[0]);
       //waitpid(repartidor, NULL, 0);
@@ -69,20 +69,30 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
   // aca se chequea que el id que se recibio sea igual a algun valor de la lista
   // entonces se cambia el color en el caso que coincida
   // y luego hay que notificar a los repartidores
-  printf("LOS SEMAFOROS 1: %d, EL SEGUNDO: %d, EL TERCERO: %d\n", id_semaforos[0], id_semaforos[1], id_semaforos[2]);
+  printf("ENTRAMOS A HANDLE SIGINY %d\n", number_received);
   if (id_semaforos[0] == number_received){
     //printf("SE INGRESA EL PRIMER SEMORO POR SEGUNDA VEZ: %d\n", number_received);
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[0] == 0)
     {
+      printf("PRIMER IF\n");
       lights[0] = 1;
       //printf("ESTABA EN VERDE 1\n");
       // ahora hay que mandar la señal a los repartidores
       // for repatidor: mando señal
+      for (int i = 0; i < creados; i++)
+      {
+        send_signal_with_int(repartidores[i], getpid());
+      }
     }
     else
     {
+      printf("PRIMER IF dos\n");
       lights[0] = 0;
+      for (int i = 0; i < creados; i++)
+      {
+        send_signal_with_int(repartidores[i], getpid());
+      }
       //printf("ESTABA EN ROJO 1\n");
       // ahora hay que mandar la señal a los repartidores
     }
@@ -92,13 +102,23 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[1] == 0)
     {
+      printf("Segundo IF\n");
+      printf("REPARTIDOR 0: %d", repartidores[0]);
       lights[1] = 1;
+      for (int i = 0; i < creados; i++)
+      {
+        send_signal_with_int(repartidores[i], getpid());
+      }
       //printf("ESTABA EN VERDE 2\n");
       // ahora hay que mandar la señal a los repartidores
     }
     else
     {
       lights[1] = 0;
+      for (int i = 0; i < creados; i++)
+      {
+        send_signal_with_int(repartidores[i], getpid());
+      }
       //printf("ESTABA EN ROJO 2\n");
       // ahora hay que mandar la señal a los repartidores
     }
@@ -109,12 +129,20 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
     if (lights[2] == 0)
     {
       lights[2] = 1;
+      for (int i = 0; i < creados; i++)
+      {
+        send_signal_with_int(repartidores[i], getpid());
+      }
       //printf("ESTABA EN VERDE 3\n");
       // ahora hay que mandar la señal a los repartidores
     }
     else
     {
       lights[2] = 0;
+      for (int i = 0; i < creados; i++)
+      {
+        send_signal_with_int(repartidores[i], getpid());
+      }
       //printf("ESTABA EN ROJO 3\n");
       // ahora hay que mandar la señal a los repartidores
     }
@@ -177,8 +205,8 @@ int main(int argc, char const *argv[])
     datos[i] = y;
     printf("%s, ", data_in->lines[1][i]);
   }
+  repartidores = calloc(datos[1], sizeof(int));
   printf("\n");
-  //repartidores = malloc(datos[1] * sizeof(int));
   // crear array
   printf(" ---------674654\n");
   pid_t fabrica = fork();
