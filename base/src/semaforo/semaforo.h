@@ -12,6 +12,7 @@ struct semaforo
     int delay;
     int parentId;
     int color;//0 verde, 1 rojo
+    int cambios;
 };
 
 typedef struct semaforo Semaforo;

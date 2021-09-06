@@ -12,6 +12,7 @@ Semaforo* semaforo_init(int id, int distance,int delay, int parentId)
   semaforo -> id = id;
   semaforo -> delay = delay;
   semaforo -> color = 0;
+  semaforo -> cambios = 0;
   return semaforo;
 }
 
@@ -27,6 +28,7 @@ int main(int argc, char const *argv[])
   while (true)
   {
     sleep(semaforo -> delay);
+    semaforo -> cambios ++;
     send_signal_with_int(semaforo ->parentId, semaforo->id);
   }
 
