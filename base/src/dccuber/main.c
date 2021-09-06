@@ -19,9 +19,7 @@ void handle_repartidor(int sig)
   printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
   if (creados < datos[1])
   {
-    printf("ARRIBA\n");
     pid_t repartidor = fork();
-    printf("ABAJO\n");
     if (repartidor == 0)
     {
       printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
@@ -47,17 +45,17 @@ void handle_repartidor(int sig)
       sprintf(l3, "%d", lights[2]);
       char * args[] ={"./repartidor", l1, l2, l3, 
       d1, d2, d3, d4};
-      printf("''''''''-------\n");
       execv(args[0], args);
     }
     else
     {
       printf("--------------------------------------\n");
       printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
-      repartidores[creados] = repartidor;
-      creados ++;
-      //alarm(datos[0]);
-      //waitpid(repartidor);
+      //repartidores[creados] = repartidor;
+      //creados ++;
+      printf("yuytutyutyutyututy\n");
+      alarm(datos[0]);
+      //waitpid(repartidor, NULL, 0);
 
     }
   }
@@ -193,9 +191,11 @@ int main(int argc, char const *argv[])
     signal(SIGALRM, handle_repartidor);
     alarm(datos[0]);
     connect_sigaction(SIGUSR1, handle_sigint);
-    while (true)
-    {
+    for (int i =0; i < 5000;i++){
+      pause();
     }
+    
+
   }
   else
   {
@@ -255,6 +255,7 @@ int main(int argc, char const *argv[])
           {
             // id_semaforos[2] = semaforo3;
             send_signal_with_int(fabrica, semaforo3);
+            waitpid(fabrica, NULL, 0);
           }
         }
       }

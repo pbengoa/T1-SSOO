@@ -25,11 +25,13 @@ int main(int argc, char const *argv[])
   int parentId = atoi(argv[3]);
   Semaforo* semaforo = semaforo_init(getpid(), distance, delay, parentId);
   // printf("semaforo data: %d, %d, %d\n", semaforo->id,semaforo->delay, semaforo->parentId);
-  while (true)
+  int i = 0;
+  while (i < 500)
   {
     sleep(semaforo -> delay);
     semaforo -> cambios ++;
     send_signal_with_int(semaforo ->parentId, semaforo->id);
+    i++;
   }
 
 
