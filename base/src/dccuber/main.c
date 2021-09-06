@@ -13,16 +13,33 @@ int *distances;
 int *repartidores;
 int creados = 0;
 int *datos;
+pid_t fabrica;
+
+void handle_kill_repartidor(int sig)
+{
+  printf("kill repartidor\n");
+  for (int i=0; i < creados; i++)
+  {
+    printf("REPARTIDOR: %d\n", repartidores[i]);
+    kill(repartidores[i], SIGABRT);
+  }
+  if (creados == 0)
+  {
+    exit(1);
+  }
+  else{
+    waitpid(repartidores[creados - 1], NULL, 0);
+    exit(1);
+  }
+}
 
 void handle_repartidor(int sig)
 {
-  printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
   if (creados < datos[1])
   {
     pid_t repartidor = fork();
     if (repartidor == 0)
     {
-      printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
       char *d1 = malloc(sizeof(int));
       sprintf(d1, "%d", distances[0]);
 
@@ -43,8 +60,12 @@ void handle_repartidor(int sig)
 
       char *l3 = malloc(sizeof(int));
       sprintf(l3, "%d", lights[2]);
+
+      char *num_created = malloc(sizeof(int));
+      sprintf(num_created, "%d", creados);
+
       char * args[] ={"./repartidor", l1, l2, l3, 
-      d1, d2, d3, d4, NULL};
+      d1, d2, d3, d4, num_created, NULL};
       execv(args[0], args);
     }
     else
@@ -53,9 +74,8 @@ void handle_repartidor(int sig)
       printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
       repartidores[creados] = repartidor;
       creados ++;
-      printf("yuytutyutyutyututy\n");
       alarm(datos[0]);
-      //waitpid(repartidor, NULL, 0);
+      waitpid(repartidor, NULL, 0);
 
     }
   }
@@ -69,29 +89,26 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
   // aca se chequea que el id que se recibio sea igual a algun valor de la lista
   // entonces se cambia el color en el caso que coincida
   // y luego hay que notificar a los repartidores
-  printf("ENTRAMOS A HANDLE SIGINY %d\n", number_received);
   if (id_semaforos[0] == number_received){
     //printf("SE INGRESA EL PRIMER SEMORO POR SEGUNDA VEZ: %d\n", number_received);
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[0] == 0)
     {
-      printf("PRIMER IF\n");
       lights[0] = 1;
       //printf("ESTABA EN VERDE 1\n");
       // ahora hay que mandar la señal a los repartidores
       // for repatidor: mando señal
       for (int i = 0; i < creados; i++)
       {
-        send_signal_with_int(repartidores[i], getpid());
+        send_signal_with_int(repartidores[i], 1);
       }
     }
     else
     {
-      printf("PRIMER IF dos\n");
       lights[0] = 0;
       for (int i = 0; i < creados; i++)
       {
-        send_signal_with_int(repartidores[i], getpid());
+        send_signal_with_int(repartidores[i], 1);
       }
       //printf("ESTABA EN ROJO 1\n");
       // ahora hay que mandar la señal a los repartidores
@@ -102,12 +119,10 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
     // Aca se revisara el color actual del semaforo y se cambiara
     if (lights[1] == 0)
     {
-      printf("Segundo IF\n");
-      printf("REPARTIDOR 0: %d", repartidores[0]);
       lights[1] = 1;
       for (int i = 0; i < creados; i++)
       {
-        send_signal_with_int(repartidores[i], getpid());
+        send_signal_with_int(repartidores[i], 2);
       }
       //printf("ESTABA EN VERDE 2\n");
       // ahora hay que mandar la señal a los repartidores
@@ -117,7 +132,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       lights[1] = 0;
       for (int i = 0; i < creados; i++)
       {
-        send_signal_with_int(repartidores[i], getpid());
+        send_signal_with_int(repartidores[i], 2);
       }
       //printf("ESTABA EN ROJO 2\n");
       // ahora hay que mandar la señal a los repartidores
@@ -131,7 +146,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       lights[2] = 1;
       for (int i = 0; i < creados; i++)
       {
-        send_signal_with_int(repartidores[i], getpid());
+        send_signal_with_int(repartidores[i], 3);
       }
       //printf("ESTABA EN VERDE 3\n");
       // ahora hay que mandar la señal a los repartidores
@@ -141,7 +156,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       lights[2] = 0;
       for (int i = 0; i < creados; i++)
       {
-        send_signal_with_int(repartidores[i], getpid());
+        send_signal_with_int(repartidores[i], 3);
       }
       //printf("ESTABA EN ROJO 3\n");
       // ahora hay que mandar la señal a los repartidores
@@ -174,8 +189,15 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 
 }
 
+void handle_killAll(int sig)
+{
+  printf("hfsgjgfdsfghjkgfds\n");
+  kill(fabrica, SIGABRT);
+}
+
 int main(int argc, char const *argv[])
 {
+  signal(SIGINT, handle_killAll);
   printf("I'm the DCCUBER process and my PID is: %i\n", getpid());
   char *filename = "input.txt";
   InputFile *data_in = read_file(filename);
@@ -208,14 +230,11 @@ int main(int argc, char const *argv[])
   repartidores = calloc(datos[1], sizeof(int));
   printf("\n");
   // crear array
-  printf(" ---------674654\n");
-  pid_t fabrica = fork();
-  printf(" ---------6746thrttsbdz\n");
+  fabrica = fork();
   if(fabrica == 0)
   {
     // This code will be executed only by the child
-    printf(" ###############\n");
-    printf("DATOS 0 %d\n", datos[0]);
+    signal(SIGABRT, handle_kill_repartidor);
     signal(SIGALRM, handle_repartidor);
     alarm(datos[0]);
     connect_sigaction(SIGUSR1, handle_sigint);
@@ -238,13 +257,12 @@ int main(int argc, char const *argv[])
           sprintf(distance, "%d", distances[0]);
           char * dato = calloc(1, sizeof(int)); 
           sprintf(dato, "%d", datos[2]);
-          char *args[] = {"./semaforo", distance, dato, pid_char, NULL};
+          char *args[] = {"./semaforo", distance, dato, pid_char, "1",NULL};
           execv(args[0], args);
           //Esto se repite igual en todos los casos
       }
       else 
       {
-        printf(" fbsffsnfsnR\n");
         send_signal_with_int(fabrica, semaforo1);
         pid_t semaforo2 = fork();
         if(semaforo2 == 0)
@@ -258,7 +276,7 @@ int main(int argc, char const *argv[])
 
           char * dato = calloc(1, sizeof(int)); 
           sprintf(dato, "%d", datos[3]);
-          char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
+          char *args[] = {"./semaforo", distance, dato, pid_char, "2", NULL};
           execv(args[0], args);
         }
         else
@@ -276,7 +294,7 @@ int main(int argc, char const *argv[])
             sprintf(distance, "%d", distances[2]);
             char * dato = calloc(1, sizeof(int)); 
             sprintf(dato, "%d",  datos[4]);
-            char *args[] = {"./semaforo", distance, dato, pid_char,NULL};
+            char *args[] = {"./semaforo", distance, dato, pid_char, "3", NULL};
             execv(args[0], args);
           }
           else
@@ -284,12 +302,17 @@ int main(int argc, char const *argv[])
             // id_semaforos[2] = semaforo3;
             send_signal_with_int(fabrica, semaforo3);
             waitpid(fabrica, NULL, 0);
+            kill(semaforo1, SIGABRT);
+            kill(semaforo2, SIGABRT);
+            kill(semaforo3, SIGABRT);
+            waitpid(semaforo1, NULL, 0);
+            waitpid(semaforo2, NULL, 0);
+            waitpid(semaforo3, NULL, 0);
           }
         }
       }
       
   }
-
   printf("Liberando memoria...\n");
   input_file_destroy(data_in);
 }

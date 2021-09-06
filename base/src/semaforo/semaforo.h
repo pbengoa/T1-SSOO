@@ -13,11 +13,12 @@ struct semaforo
     int parentId;
     int color;//0 verde, 1 rojo
     int cambios;
+    int num_created;
 };
 
 typedef struct semaforo Semaforo;
 
-Semaforo* semaforo_init(int id, int distance,int delay, int parentId);
+Semaforo* semaforo_init(int id, int distance,int delay, int parentId, int num_created);
 
 
 
