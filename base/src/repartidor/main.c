@@ -2,6 +2,8 @@
 #include <unistd.h>
 #include "repartidor.h"
 #include <stdlib.h>
+#include <signal.h>
+
 #include "../file_manager/manager.h"
 Repartidor* repartidor;
 
@@ -106,7 +108,7 @@ int main(int argc, char const *argv[])
   connect_sigaction(SIGUSR1, handler_change_light);
   while (repartidor ->position < repartidor ->bodega)
   {
-    printf("REPATIDOR POSITION: %d\n", repartidor->position);
+    printf("REPATIDOR %d POSITION: %d\n", getpid(), repartidor->position);
     sleep(1);
     if (repartidor -> position + 1 == repartidor ->pos_s1 && repartidor -> color_s1 == 0)
     {
