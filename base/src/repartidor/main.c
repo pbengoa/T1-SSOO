@@ -29,12 +29,13 @@ Repartidor* repartidor_init(
   repartidor -> bodega = bodega;
 
   repartidor -> position = 0;
-
+  printf("CREADO EL GIL\n");
   return repartidor;
 }
 
 void handler_change_light(int sig, siginfo_t *siginfo, void *context)
 {
+  printf("CAMBIANDO LA LUZ&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
   int number_received = siginfo->si_value.sival_int;
   if (number_received == 1)
   {
@@ -74,7 +75,6 @@ void handler_change_light(int sig, siginfo_t *siginfo, void *context)
 int main(int argc, char const *argv[])
 {
   printf("I'm the REPARTIDOR process and my PID is: %i\n", getpid());
-
   int color_s1 = atoi(argv[1]);
   int color_s2 = atoi(argv[2]);
   int color_s3 = atoi(argv[3]);
@@ -83,6 +83,15 @@ int main(int argc, char const *argv[])
   int pos_s2 = atoi(argv[5]);
   int pos_s3 = atoi(argv[6]);
   int bodega = atoi(argv[7]);
+
+  printf("VALORES: %d, %d, %d, %d, %d, %d, %d\n", 
+  color_s1, 
+  color_s2, 
+  color_s3, 
+  pos_s1,
+  pos_s2,
+  pos_s3,
+  bodega);
 
   repartidor = repartidor_init(
     getpid(), 
@@ -94,28 +103,34 @@ int main(int argc, char const *argv[])
     pos_s3,
     bodega
     );
-
+  connect_sigaction(SIGUSR1, handler_change_light);
   while (repartidor ->position < repartidor ->bodega)
   {
-    connect_sigaction(SIGUSR1, handler_change_light);
+    printf("REPATIDOR POSITION: %d\n", repartidor->position);
     sleep(1);
-    if (repartidor -> position == repartidor ->pos_s1 && repartidor -> color_s1 == 0)
+    if (repartidor -> position + 1 == repartidor ->pos_s1 && repartidor -> color_s1 == 0)
     {
       repartidor -> position ++;
     }
-    else if (repartidor -> position == repartidor ->pos_s2 && repartidor -> color_s2 == 0)
+    else if (repartidor -> position + 1 == repartidor ->pos_s2 && repartidor -> color_s2 == 0)
     {
       repartidor -> position ++;
     }
-    else if (repartidor -> position == repartidor ->pos_s3 && repartidor -> color_s3 == 0)
+    else if (repartidor -> position + 1 == repartidor ->pos_s3 && repartidor -> color_s3 == 0)
     {
       repartidor -> position ++;
     }
-    else if (repartidor -> position == repartidor ->bodega)
+    else if (repartidor -> position + 1 != repartidor ->pos_s1 
+    && repartidor -> position + 1 != repartidor ->pos_s2
+    && repartidor -> position + 1 != repartidor ->pos_s3)
     {
+      repartidor -> position ++;
+    }
+    //else if (repartidor -> position == repartidor ->bodega)
+    //{
       // escribir archivo
       // hacer un kill
-    }
+    //}
 
     // hay que revisar la pos y la luz
     // avanzar
@@ -124,5 +139,6 @@ int main(int argc, char const *argv[])
     
   }
   // mandar señal termino
+  printf("HE TERMINADO\n");
   
 }

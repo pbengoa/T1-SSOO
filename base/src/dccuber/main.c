@@ -3,6 +3,7 @@
 #include <sys/wait.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include "../file_manager/manager.h"
 // global int *lights = calloc(3,sizeof(int));
@@ -11,44 +12,54 @@ int *id_semaforos;
 int *distances;
 int *repartidores;
 int creados = 0;
+int *datos;
 
 void handle_repartidor(int sig)
 {
-  pid_t repartidor = fork();
-  if (repartidor == 0)
+  printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
+  if (creados < datos[1])
   {
-    printf("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&\n");
-    char *d1 = malloc(sizeof(int));
-    sprintf(d1, "%d", distances[0]);
+    pid_t repartidor = fork();
+    if (repartidor == 0)
+    {
+      printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+      char *d1 = malloc(sizeof(int));
+      sprintf(d1, "%d", distances[0]);
 
-    char *d2 = malloc(sizeof(int));
-    sprintf(d2, "%d", distances[1]);
+      char *d2 = malloc(sizeof(int));
+      sprintf(d2, "%d", distances[1]);
 
-    char *d3 = malloc(sizeof(int));
-    sprintf(d3, "%d", distances[2]);
+      char *d3 = malloc(sizeof(int));
+      sprintf(d3, "%d", distances[2]);
 
-    char *d4 = malloc(sizeof(int));
-    sprintf(d4, "%d", distances[3]);
+      char *d4 = malloc(sizeof(int));
+      sprintf(d4, "%d", distances[3]);
 
-    char *l1 = malloc(sizeof(int));
-    sprintf(l1, "%d", lights[0]);
+      char *l1 = malloc(sizeof(int));
+      sprintf(l1, "%d", lights[0]);
 
-     char *l2 = malloc(sizeof(int));
-    sprintf(l2, "%d", lights[1]);
+      char *l2 = malloc(sizeof(int));
+      sprintf(l2, "%d", lights[1]);
 
-    char *l3 = malloc(sizeof(int));
-    sprintf(l3, "%d", lights[2]);
-    char * args[] ={"./repartidor", l1, l2, l3, 
-    d1, d2, d3, d4};
-    execv(args[0], args);
+      char *l3 = malloc(sizeof(int));
+      sprintf(l3, "%d", lights[2]);
+      char * args[] ={"./repartidor", l1, l2, l3, 
+      d1, d2, d3, d4};
+      execv(args[0], args);
+    }
+    else
+    {
+      printf("--------------------------------------\n");
+      printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
+      //repartidores[creados] = repartidor;
+      //creados ++;
+      printf("yuytutyutyutyututy\n");
+      alarm(datos[0]);
+      //waitpid(repartidor, NULL, 0);
+
+    }
   }
-  else
-  {
-    printf("--------------------------------------\n");
-    printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
-    repartidores[creados] = repartidor;
-    creados ++;
-  }
+  
 }
 
 void handle_sigint(int sig, siginfo_t *siginfo, void *context)
@@ -145,7 +156,7 @@ int main(int argc, char const *argv[])
   printf("- Lineas en archivo: %i\n", data_in->len);
   printf("- Contenido del archivo:\n");
   distances = calloc(4,sizeof(int));
-  int *datos = calloc (5, sizeof(int));
+  datos = calloc (5, sizeof(int));
   lights = calloc(3,sizeof(int));
   id_semaforos = calloc(3,sizeof(int));
   
@@ -176,16 +187,15 @@ int main(int argc, char const *argv[])
   {
     // This code will be executed only by the child
     printf(" ###############\n");
-
-    while (creados < datos[1])
-    {
-      // señal del semaforo
-      connect_sigaction(SIGUSR1, handle_sigint);
-
-      // alarm repartidor
-      signal(SIGALRM, handle_repartidor);
-      alarm(2);
+    printf("DATOS 0 %d\n", datos[0]);
+    signal(SIGALRM, handle_repartidor);
+    alarm(datos[0]);
+    connect_sigaction(SIGUSR1, handle_sigint);
+    for (int i =0; i < 5000;i++){
+      pause();
     }
+    
+
   }
   else
   {
@@ -245,6 +255,7 @@ int main(int argc, char const *argv[])
           {
             // id_semaforos[2] = semaforo3;
             send_signal_with_int(fabrica, semaforo3);
+            waitpid(fabrica, NULL, 0);
           }
         }
       }
