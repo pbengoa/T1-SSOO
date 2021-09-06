@@ -115,6 +115,40 @@ void handle_kill(int sig)
     exit(1);
 }
 
+void handle_kill_2(int sig)
+{
+    printf("HOMICIDIO\n");
+    FILE *fptr;
+    char *number = malloc(sizeof(int));
+    sprintf(number, "%d", repartidor -> num_created);
+
+    char *route = malloc(sizeof(char));
+    route = "repartidor_" ;
+
+    char path[strlen(route) + strlen(number) + 1];
+
+    strcpy(path, route);
+    strcat(path, number);
+
+    char *termi = malloc(sizeof(char));
+    termi = ".txt";
+
+    char path2[strlen(path) + strlen(termi) + 1]; 
+
+    strcpy(path2, path);
+    strcat(path2, termi);
+    printf("ROUTEEEEE: %s\n", path2);
+    fptr = fopen(path2,"w");
+    fprintf(fptr,"%d,%d,%d,%d",
+    repartidor -> pasamos_1, 
+    repartidor -> pasamos_2, 
+    repartidor -> pasamos_3,
+    repartidor -> llegamos
+    );
+    fclose(fptr);
+    exit(1);
+}
+
 int main(int argc, char const *argv[])
 {
   printf("I'm the REPARTIDOR process and my PID is: %i\n", getpid());
@@ -150,6 +184,7 @@ int main(int argc, char const *argv[])
     );
     // recepcion de señal de termino, crear funicion y escribir archivo
   signal(SIGABRT, handle_kill);
+  signal(SIGKILL, handle_kill_2);
   connect_sigaction(SIGUSR1, handler_change_light);
   int contador = 0;
   while (repartidor ->position < repartidor ->bodega)
@@ -218,5 +253,5 @@ int main(int argc, char const *argv[])
   );
   fclose(fptr);
   printf("HE TERMINADO %d\n", num_created);
-  
+  exit(1);  
 }

@@ -14,6 +14,17 @@ int *repartidores;
 int creados = 0;
 int *datos;
 pid_t fabrica;
+int liberados = 0;
+
+// void handle_finish_repartidor(int sig, siginfo_t *siginfo, void *context)
+// {
+//   printf("tttttttttttttttttttttttttttttttttttttttt\n");
+//   liberados ++;
+//   int number_received = siginfo->si_value.sival_int;
+//   kill(number_received, SIGKILL);
+
+
+// }
 
 void handle_kill_repartidor(int sig)
 {
@@ -29,8 +40,8 @@ void handle_kill_repartidor(int sig)
   }
   else{
     waitpid(repartidores[creados - 1], NULL, 0);
-    exit(1);
   }
+
 }
 
 void handle_repartidor(int sig)
@@ -76,10 +87,11 @@ void handle_repartidor(int sig)
       creados ++;
       alarm(datos[0]);
       waitpid(repartidor, NULL, 0);
+      // liberados ++;
+      // printf("SALIMOs DE %d\n", repartidor);
 
     }
   }
-  
 }
 
 void handle_sigint(int sig, siginfo_t *siginfo, void *context)
@@ -239,10 +251,12 @@ int main(int argc, char const *argv[])
     alarm(datos[0]);
     connect_sigaction(SIGUSR1, handle_sigint);
     for (int i =0; i < 5000;i++){
+      if (liberados == datos[1])
+      {
+        exit(1);
+      }
       pause();
     }
-    
-
   }
   else
   {
