@@ -46,9 +46,8 @@ void handle_kill(int sig)
     fptr = fopen(path2,"w");
     fprintf(fptr,"%d", semaforo -> cambios);
     fclose(fptr);
-    free(semaforo ->parentId);
-    free(semaforo ->distance);
-    free(semaforo ->delay);
+    free(semaforo);
+
     exit(1);
 }
 void handle_alarm(int sig)

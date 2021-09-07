@@ -250,6 +250,7 @@ int main(int argc, char const *argv[])
   if(fabrica == 0)
   {
     // This code will be executed only by the child
+    // printf("hola\n");
     signal(SIGINT, handle_nothing);
     signal(SIGABRT, handle_kill_repartidor);
     signal(SIGALRM, handle_repartidor);

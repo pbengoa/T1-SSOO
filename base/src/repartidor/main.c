@@ -113,14 +113,8 @@ void handle_kill(int sig)
     );
     fclose(fptr);
     
-    free(repartidor -> pos_s1);
-    free(repartidor -> pos_s2);
-    free(repartidor -> pos_s3);
-    free(repartidor -> bodega);
-    free(repartidor -> color_s1);
-    free(repartidor -> color_s2);
-    free(repartidor -> color_s3);
-    free(repartidor -> num_created);
+    free(repartidor);
+
     exit(1);
 }
 void handle_nothing(int sig){}
@@ -231,14 +225,7 @@ int main(int argc, char const *argv[])
   printf("HE TERMINADO %d\n", num_created);
   send_signal_with(getppid(), repartidor -> id);
 
-  free(repartidor -> pos_s1);
-  free(repartidor -> pos_s2);
-  free(repartidor -> pos_s3);
-  free(repartidor -> bodega);
-  free(repartidor -> color_s1);
-  free(repartidor -> color_s2);
-  free(repartidor -> color_s3);
-  free(repartidor -> num_created);
+  free(repartidor);
 
   exit(1);  
 }
