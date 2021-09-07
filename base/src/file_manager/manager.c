@@ -125,3 +125,9 @@ void send_signal_with_int(int pid, int payload)
   sig.sival_int = payload;
   sigqueue(pid, SIGUSR1, sig);
 }
+void send_signal_with(int pid, int payload)
+{
+  union sigval sig = {};
+  sig.sival_int = payload;
+  sigqueue(pid, SIGUSR2, sig);
+}

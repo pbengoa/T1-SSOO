@@ -3,7 +3,7 @@
 #include "repartidor.h"
 #include <stdlib.h>
 #include <signal.h>
-#include <string.h>
+// #include <string.h>
 
 #include "../file_manager/manager.h"
 Repartidor* repartidor;
@@ -45,7 +45,7 @@ Repartidor* repartidor_init(
 void handler_change_light(int sig, siginfo_t *siginfo, void *context)
 {
   int number_received = siginfo->si_value.sival_int;
-  printf("cambio de color: %d\n", number_received);
+  // printf("cambio de color: %d\n", number_received);
   if (number_received == 1)
   {
     if (repartidor -> color_s1 == 0)
@@ -83,7 +83,7 @@ void handler_change_light(int sig, siginfo_t *siginfo, void *context)
 
 void handle_kill(int sig)
 {
-    printf("HOMICIDIO\n");
+    // printf("HOMICIDIO\n");
     FILE *fptr;
     char *number = malloc(sizeof(int));
     sprintf(number, "%d", repartidor -> num_created);
@@ -103,7 +103,7 @@ void handle_kill(int sig)
 
     strcpy(path2, path);
     strcat(path2, termi);
-    printf("ROUTEEEEE: %s\n", path2);
+    // printf("ROUTEEEEE: %s\n", path2);
     fptr = fopen(path2,"w");
     fprintf(fptr,"%d,%d,%d,%d",
     repartidor -> pasamos_1, 
@@ -112,45 +112,23 @@ void handle_kill(int sig)
     repartidor -> llegamos
     );
     fclose(fptr);
+    
+    free(repartidor -> pos_s1);
+    free(repartidor -> pos_s2);
+    free(repartidor -> pos_s3);
+    free(repartidor -> bodega);
+    free(repartidor -> color_s1);
+    free(repartidor -> color_s2);
+    free(repartidor -> color_s3);
+    free(repartidor -> num_created);
     exit(1);
 }
-
-void handle_kill_2(int sig)
-{
-    printf("HOMICIDIO\n");
-    FILE *fptr;
-    char *number = malloc(sizeof(int));
-    sprintf(number, "%d", repartidor -> num_created);
-
-    char *route = malloc(sizeof(char));
-    route = "repartidor_" ;
-
-    char path[strlen(route) + strlen(number) + 1];
-
-    strcpy(path, route);
-    strcat(path, number);
-
-    char *termi = malloc(sizeof(char));
-    termi = ".txt";
-
-    char path2[strlen(path) + strlen(termi) + 1]; 
-
-    strcpy(path2, path);
-    strcat(path2, termi);
-    printf("ROUTEEEEE: %s\n", path2);
-    fptr = fopen(path2,"w");
-    fprintf(fptr,"%d,%d,%d,%d",
-    repartidor -> pasamos_1, 
-    repartidor -> pasamos_2, 
-    repartidor -> pasamos_3,
-    repartidor -> llegamos
-    );
-    fclose(fptr);
-    exit(1);
-}
+void handle_nothing(int sig){}
 
 int main(int argc, char const *argv[])
 {
+  signal(SIGABRT, handle_kill);
+  signal(SIGINT, handle_nothing);
   printf("I'm the REPARTIDOR process and my PID is: %i\n", getpid());
   int color_s1 = atoi(argv[1]);
   int color_s2 = atoi(argv[2]);
@@ -162,14 +140,14 @@ int main(int argc, char const *argv[])
   int bodega = atoi(argv[7]);
   int num_created = atoi(argv[8]);
 
-  printf("VALORES: %d, %d, %d, %d, %d, %d, %d\n", 
-  color_s1, 
-  color_s2, 
-  color_s3, 
-  pos_s1,
-  pos_s2,
-  pos_s3,
-  bodega);
+  // printf("VALORES: %d, %d, %d, %d, %d, %d, %d\n", 
+  // color_s1, 
+  // color_s2, 
+  // color_s3, 
+  // pos_s1,
+  // pos_s2,
+  // pos_s3,
+  // bodega);
 
   repartidor = repartidor_init(
     getpid(), 
@@ -183,15 +161,13 @@ int main(int argc, char const *argv[])
     num_created
     );
     // recepcion de señal de termino, crear funicion y escribir archivo
-  signal(SIGABRT, handle_kill);
-  signal(SIGKILL, handle_kill_2);
   connect_sigaction(SIGUSR1, handler_change_light);
   int contador = 0;
   while (repartidor ->position < repartidor ->bodega)
   {
-    printf("REPATIDOR %d POSITION: %d\n", getpid(), repartidor->position);
-    contador ++;
+    // printf("REPATIDOR %d POSITION: %d\n", getpid(), repartidor->position);
     sleep(1);
+    contador ++;
     if (repartidor -> position + 1 == repartidor ->pos_s1 && repartidor -> color_s1 == 0)
     {
       repartidor -> position ++;
@@ -243,7 +219,7 @@ int main(int argc, char const *argv[])
 
   strcpy(path2, path);
   strcat(path2, termi);
-  printf("ROUTEEEEE: %s\n", path2);
+  // printf("ROUTEEEEE: %s\n", path2);
   fptr = fopen(path2,"w");
   fprintf(fptr,"%d,%d,%d,%d",
   repartidor -> pasamos_1, 
@@ -253,5 +229,16 @@ int main(int argc, char const *argv[])
   );
   fclose(fptr);
   printf("HE TERMINADO %d\n", num_created);
+  send_signal_with(getppid(), repartidor -> id);
+
+  free(repartidor -> pos_s1);
+  free(repartidor -> pos_s2);
+  free(repartidor -> pos_s3);
+  free(repartidor -> bodega);
+  free(repartidor -> color_s1);
+  free(repartidor -> color_s2);
+  free(repartidor -> color_s3);
+  free(repartidor -> num_created);
+
   exit(1);  
 }
