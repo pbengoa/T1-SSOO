@@ -6,7 +6,6 @@
 #include <signal.h>
 
 #include "../file_manager/manager.h"
-// global int *lights = calloc(3,sizeof(int));
 int *lights;
 int *id_semaforos;
 int *distances;
@@ -15,37 +14,56 @@ int creados = 0;
 int *datos;
 pid_t fabrica;
 int liberados = 0;
+int rep_vivos = 0;
 
-// void handle_finish_repartidor(int sig, siginfo_t *siginfo, void *context)
-// {
-//   printf("tttttttttttttttttttttttttttttttttttttttt\n");
-//   liberados ++;
-//   int number_received = siginfo->si_value.sival_int;
-//   kill(number_received, SIGKILL);
-
-
-// }
+void handle_change_repartidor(int sig, siginfo_t *siginfo, void *context)
+{
+  int number_received = siginfo->si_value.sival_int;
+  for (int i = 0; i < creados; i++)
+  {
+    if (number_received == repartidores[i])
+    {
+      repartidores[i] = 0;
+      rep_vivos -= 1;
+    }
+  }
+}
+void handle_nothing(int sig){
+  pid_t wpid;
+  int status = 0;
+  while ((wpid = wait(&status)) > 0);
+  exit(1);
+}
 
 void handle_kill_repartidor(int sig)
 {
-  printf("kill repartidor\n");
+  pid_t wpid;
+  int status = 0;
+  // printf("kill repartidor: %d\n", repartidores[0]);
   for (int i=0; i < creados; i++)
   {
-    printf("REPARTIDOR: %d\n", repartidores[i]);
-    kill(repartidores[i], SIGABRT);
+    if (repartidores[i] != 0)
+    {
+      // printf("REPARTIDOR: %d\n", repartidores[i]);
+      kill(repartidores[i], SIGABRT);
+    }
   }
-  if (creados == 0)
+  if (rep_vivos > 0)
   {
+    while ((wpid = wait(&status)) > 0);
     exit(1);
   }
-  else{
-    waitpid(repartidores[creados - 1], NULL, 0);
+  else
+  {
+    exit(1);
   }
 
 }
 
 void handle_repartidor(int sig)
 {
+  //int status;
+  //pid_t pid = 0;
   if (creados < datos[1])
   {
     pid_t repartidor = fork();
@@ -81,35 +99,35 @@ void handle_repartidor(int sig)
     }
     else
     {
-      printf("--------------------------------------\n");
-      printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
+      //printf("--------------------------------------\n");
+      //printf("REPARTIDOR NUMERO %d, ID: %d\n", creados, repartidor);
       repartidores[creados] = repartidor;
       creados ++;
+      rep_vivos ++;
       alarm(datos[0]);
-      waitpid(repartidor, NULL, 0);
-      // liberados ++;
-      // printf("SALIMOs DE %d\n", repartidor);
-
+      // waitpid(repartidor, NULL, 0);
+      //printf("CREADOS %d\n", creados);
+  
     }
+  }
+  else
+  {
+    // printf("$$$$$$$$$$$$$$$$$$$$$$$$$$\n");
+    while (repartidores[creados - 1] != 0);
+    exit(1);
   }
 }
 
 void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 {
   int number_received = siginfo->si_value.sival_int;
-  //printf("THE VALUE %d\n", number_received);
-  // aca se chequea que el id que se recibio sea igual a algun valor de la lista
-  // entonces se cambia el color en el caso que coincida
-  // y luego hay que notificar a los repartidores
+
   if (id_semaforos[0] == number_received){
-    //printf("SE INGRESA EL PRIMER SEMORO POR SEGUNDA VEZ: %d\n", number_received);
-    // Aca se revisara el color actual del semaforo y se cambiara
+    printf("SEMAFORO 1\n");
     if (lights[0] == 0)
     {
       lights[0] = 1;
-      //printf("ESTABA EN VERDE 1\n");
-      // ahora hay que mandar la señal a los repartidores
-      // for repatidor: mando señal
+
       for (int i = 0; i < creados; i++)
       {
         send_signal_with_int(repartidores[i], 1);
@@ -122,13 +140,11 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       {
         send_signal_with_int(repartidores[i], 1);
       }
-      //printf("ESTABA EN ROJO 1\n");
-      // ahora hay que mandar la señal a los repartidores
+
     }
   }
   else if(id_semaforos[1] == number_received){
-    //printf("SE INGRESA EL segundo SEMORO POR SEGUNDA VEZ: %d\n", number_received);
-    // Aca se revisara el color actual del semaforo y se cambiara
+    printf("SEMAFORO 2\n");
     if (lights[1] == 0)
     {
       lights[1] = 1;
@@ -136,8 +152,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       {
         send_signal_with_int(repartidores[i], 2);
       }
-      //printf("ESTABA EN VERDE 2\n");
-      // ahora hay que mandar la señal a los repartidores
+
     }
     else
     {
@@ -146,13 +161,11 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       {
         send_signal_with_int(repartidores[i], 2);
       }
-      //printf("ESTABA EN ROJO 2\n");
-      // ahora hay que mandar la señal a los repartidores
+
     }
   }
   else if(id_semaforos[2] == number_received){
-    //printf("SE INGRESA EL tercer SEMORO POR SEGUNDA VEZ: %d\n", number_received);
-    // Aca se revisara el color actual del semaforo y se cambiara
+    printf("SEMAFORO 3\n");
     if (lights[2] == 0)
     {
       lights[2] = 1;
@@ -160,8 +173,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       {
         send_signal_with_int(repartidores[i], 3);
       }
-      //printf("ESTABA EN VERDE 3\n");
-      // ahora hay que mandar la señal a los repartidores
+
     }
     else
     {
@@ -170,32 +182,24 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
       {
         send_signal_with_int(repartidores[i], 3);
       }
-      //printf("ESTABA EN ROJO 3\n");
-      // ahora hay que mandar la señal a los repartidores
+
     }
   }
 
   else
   {
-    // printf("Id semaforo: %d\n", number_received);
-    // printf("Id lista semaforo 1: %d\n", id_semaforos[0]);
-    // Aca reviso si la posicion 0, 1 y 2 de la lista id_semaforo estan con valor 0
-    // Si estan con valor 0 entonces es porque todavia no ha cambiado el semaforo por primera vez
-    // Entonces se agrega el id a la lista y y se cambia el color
+
     if (id_semaforos[0] == 0)
     {
       id_semaforos[0] = number_received;
-      //printf("SE INGRESA EL PRIMER SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
     else if(id_semaforos[1] == 0)
     {
       id_semaforos[1] = number_received;
-      //printf("SE INGRESA EL segundo SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
     else if(id_semaforos[2] == 0)
     {
       id_semaforos[2] = number_received;
-      //printf("SE INGRESA EL tercer SEMORO POR PRIMERA VEZ: %d\n", number_received);
     }
   }
 
@@ -203,7 +207,7 @@ void handle_sigint(int sig, siginfo_t *siginfo, void *context)
 
 void handle_killAll(int sig)
 {
-  printf("hfsgjgfdsfghjkgfds\n");
+  // printf("hfsgjgfdsfghjkgfds\n");
   kill(fabrica, SIGABRT);
 }
 
@@ -246,15 +250,13 @@ int main(int argc, char const *argv[])
   if(fabrica == 0)
   {
     // This code will be executed only by the child
+    signal(SIGINT, handle_nothing);
     signal(SIGABRT, handle_kill_repartidor);
     signal(SIGALRM, handle_repartidor);
     alarm(datos[0]);
     connect_sigaction(SIGUSR1, handle_sigint);
+    connect_sigaction(SIGUSR2, handle_change_repartidor);
     for (int i =0; i < 5000;i++){
-      if (liberados == datos[1])
-      {
-        exit(1);
-      }
       pause();
     }
   }
@@ -328,5 +330,12 @@ int main(int argc, char const *argv[])
       
   }
   printf("Liberando memoria...\n");
+
+  free(distances);
+  free(datos);
+  free(lights);
+  free(id_semaforos);
+  free(repartidores);
+
   input_file_destroy(data_in);
 }
